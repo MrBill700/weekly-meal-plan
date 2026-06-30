@@ -1,0 +1,4 @@
+.env
+feedback.txt
+__pycache__/
+*.pyc

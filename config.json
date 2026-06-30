@@ -1,0 +1,105 @@
+{
+  "household": {
+    "name": "The Example Family",
+    "headline": "Your Family · Your City",
+    "who": "a family of 4 (2 adults, 2 young kids with low spice tolerance)",
+    "location": "Portland, Oregon",
+    "people": 4
+  },
+
+  "sources": {
+    "primary": {
+      "thedefineddish.com": "The Defined Dish",
+      "rachaelsgoodeats.com": "Rachael's Good Eats"
+    },
+    "secondary": {
+      "therealfooddietitians.com": "The Real Food Dietitians",
+      "eatthegains.com": "Eat the Gains"
+    }
+  },
+
+  "diet": {
+    "hard_rules": [
+      "NO fish or seafood of any kind",
+      "Low spice — kid-friendly heat levels only"
+    ],
+    "preferences": [
+      "Lower-carb emphasis — minimize rice, pasta, bread, potatoes as main components; replace with vegetables, cauliflower rice, zucchini noodles, or lettuce wraps",
+      "Whole foods, protein-focused",
+      "Simple and quick — weeknight dinners under 30-40 min active time, minimal complex techniques"
+    ],
+    "exclude_keywords": [
+      "salmon", "shrimp", "fish", "tuna", "halibut", "scallop", "lobster", "mahi",
+      "tilapia", "snapper", "trout", "ceviche", "poke", "prawn", "crawfish",
+      "calamari", "oyster", "mussel", "anchov", "sardine", "branzino", "seafood",
+      "sea-bass", "octopus", "barramundi", "crab"
+    ],
+    "exclude_tokens": ["cod", "ahi", "clam", "clams", "eel", "unagi"]
+  },
+
+  "budget": {
+    "weekly_total": "$150",
+    "notes": "Prioritize value proteins and simple ingredients."
+  },
+
+  "equipment": ["Slow Cooker", "Oven", "Stove", "Grill", "Blender"],
+
+  "schedule": {
+    "dinner_days": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    "takeout_night": "Saturday",
+    "special_rules": [
+      "Use the grill on Sunday",
+      "Incorporate the slow cooker on 1-2 weeknights (include a morning prep note)"
+    ]
+  },
+
+  "stores": [
+    {
+      "key": "costco",
+      "label": "Costco",
+      "color": "#003087",
+      "buys": "bulk proteins, oils, large quantities",
+      "strategy": "Anchor the week around 1-2 large proteins (whole chickens, bulk chicken thighs, 3lb+ ground beef, pork shoulder) that stretch across multiple meals or provide planned leftovers."
+    },
+    {
+      "key": "trader_joes",
+      "label": "Trader Joe's",
+      "color": "#B5121B",
+      "buys": "produce, sauces, convenience items",
+      "strategy": "Use for affordable produce, pre-made sauces, and quick weeknight shortcuts."
+    },
+    {
+      "key": "whole_foods",
+      "label": "Whole Foods",
+      "color": "#00674B",
+      "buys": "specialty/organic items, quality produce",
+      "strategy": "Flag items where the store brand (365) meaningfully cuts cost vs. name brand."
+    },
+    {
+      "key": "local_grocery",
+      "label": "Local Grocery",
+      "color": "#CC0000",
+      "buys": "fill-ins, dairy, pantry staples",
+      "strategy": "Prioritize weekly loss-leader categories — dairy, deli proteins, and pantry staples rotate on predictable sale cycles."
+    }
+  ],
+
+  "model": {
+    "primary": "claude-opus-4-8",
+    "openrouter_fallbacks": ["deepseek/deepseek-v4-flash", "z-ai/glm-5.2"]
+  },
+
+  "branding": {
+    "email_subject": "🍽️ Your Weekly Meal Plan — Week of {week_of}",
+    "title_html": "This Week's<br><em>Dinner Plan</em>",
+    "footer": "Generated for you every week · Happy cooking 🍽️",
+    "openrouter_app_title": "Weekly Meal Plan"
+  },
+
+  "tuning": {
+    "history_weeks": 6,
+    "catalog_sample_size": 300,
+    "secondary_sample_each": 20,
+    "min_catalog": 25
+  }
+}
