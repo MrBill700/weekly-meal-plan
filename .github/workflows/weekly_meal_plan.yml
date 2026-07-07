@@ -12,6 +12,9 @@ permissions:
 
 jobs:
   send-meal-plan:
+    # Skip in the template repo itself -- it has no secrets, so the cron
+    # would fail every Saturday. Runs normally in repos generated from it.
+    if: github.repository != 'MrBill700/weekly-meal-plan'
     runs-on: ubuntu-latest
 
     steps:
