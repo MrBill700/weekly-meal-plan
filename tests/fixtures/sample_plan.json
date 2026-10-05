@@ -1,0 +1,162 @@
+{
+  "week_of": "October 03, 2026",
+  "season": "fall",
+  "seasonal_note": "Apples, winter squash, and Brussels sprouts are at their best around Portland this week.",
+  "meals": [
+    {
+      "day": "Sunday",
+      "name": "Grilled Chicken Thighs with Charred Broccolini",
+      "method": "Grill",
+      "prep_note": "Marinate the chicken Saturday night.",
+      "description": "Smoky, mild thighs the kids will eat; extra thighs feed Monday's bowls.",
+      "cook_time": "35 min",
+      "serves": 4,
+      "ingredients": [
+        "4 lb boneless chicken thighs (half reserved for Monday)",
+        "2 bunches broccolini",
+        "3 tbsp olive oil",
+        "2 lemons",
+        "3 cloves garlic"
+      ],
+      "recipe_steps": [
+        "Whisk oil, lemon juice, and garlic; marinate the chicken overnight.",
+        "Heat the grill to medium-high.",
+        "Grill thighs 5-6 min per side until they reach 165F inside.",
+        "Grill broccolini 3-4 min until lightly charred.",
+        "Refrigerate half the chicken for Monday."
+      ],
+      "recipe_id": 1
+    },
+    {
+      "day": "Monday",
+      "name": "Greek Chicken Bowls",
+      "method": "Stove",
+      "prep_note": "",
+      "description": "Uses Sunday's extra chicken over cauliflower rice.",
+      "cook_time": "20 min",
+      "serves": 4,
+      "ingredients": [
+        "2 lb cooked chicken thighs (from Sunday)",
+        "2 bags cauliflower rice",
+        "1 English cucumber",
+        "1 pint cherry tomatoes",
+        "8 oz tzatziki"
+      ],
+      "recipe_steps": [
+        "Saute cauliflower rice 6-8 min.",
+        "Slice the chicken and warm it in the same pan.",
+        "Chop cucumber and tomatoes.",
+        "Assemble bowls and top with tzatziki."
+      ],
+      "recipe_id": null
+    },
+    {
+      "day": "Tuesday",
+      "name": "Slow Cooker Pork Carnitas Lettuce Wraps",
+      "method": "Slow Cooker",
+      "prep_note": "Start the slow cooker at 8am on LOW.",
+      "description": "Mild carnitas in butter lettuce cups.",
+      "cook_time": "15 min",
+      "serves": 4,
+      "ingredients": [
+        "3 lb pork shoulder",
+        "1 orange",
+        "1 tsp cumin",
+        "2 heads butter lettuce",
+        "1 cup pico de gallo"
+      ],
+      "recipe_steps": [
+        "Season the pork with cumin and salt.",
+        "Add pork and orange juice to the slow cooker; cook on LOW 8 hours.",
+        "Shred and crisp the pork under the broiler 4-5 min.",
+        "Serve in lettuce cups with pico."
+      ],
+      "recipe_id": 2
+    },
+    {
+      "day": "Wednesday",
+      "name": "Sheet Pan Sausage and Squash",
+      "method": "Oven",
+      "prep_note": "",
+      "description": "One pan, seasonal squash, minimal cleanup.",
+      "cook_time": "30 min",
+      "serves": 4,
+      "ingredients": [
+        "1.5 lb chicken sausage",
+        "1 butternut squash",
+        "1 lb Brussels sprouts",
+        "2 tbsp olive oil"
+      ],
+      "recipe_steps": [
+        "Heat the oven to 425F.",
+        "Cube the squash and halve the sprouts; toss with oil and salt.",
+        "Roast 15 min, add sliced sausage, roast 15 min more until the sausage reaches 165F."
+      ],
+      "recipe_id": 3
+    },
+    {
+      "day": "Thursday",
+      "name": "Beef and Broccoli Stir-Fry",
+      "method": "Stove",
+      "prep_note": "",
+      "description": "Quick weeknight stir-fry with a mild sauce.",
+      "cook_time": "25 min",
+      "serves": 4,
+      "ingredients": [
+        "1.5 lb flank steak",
+        "2 heads broccoli",
+        "1/3 cup coconut aminos",
+        "1 tbsp fresh ginger"
+      ],
+      "recipe_steps": [
+        "Slice the steak thinly against the grain.",
+        "Sear the steak in batches 2 min per side; set aside.",
+        "Stir-fry the broccoli 4 min, add sauce and the steak, toss 1 min."
+      ],
+      "recipe_id": 4
+    },
+    {
+      "day": "Friday",
+      "name": "Turkey Burger Lettuce Wraps",
+      "method": "Grill",
+      "prep_note": "",
+      "description": "Family burger night, lower-carb.",
+      "cook_time": "25 min",
+      "serves": 4,
+      "ingredients": [
+        "2 lb ground turkey",
+        "1 head iceberg lettuce",
+        "2 tomatoes",
+        "4 slices cheddar"
+      ],
+      "recipe_steps": [
+        "Form four patties and season.",
+        "Grill 5-6 min per side until they reach 165F inside.",
+        "Serve wrapped in lettuce with tomato and cheddar."
+      ],
+      "recipe_id": null
+    }
+  ],
+  "grocery": {
+    "costco": [
+      {"item": "Boneless chicken thighs, 4 lb", "est_cost": "$16.99", "likely_sale": false, "bulk_tip": "Freeze half for next week"},
+      {"item": "Pork shoulder, 3 lb", "est_cost": "$11.50", "likely_sale": false}
+    ],
+    "trader_joes": [
+      {"item": "Cauliflower rice, 2 bags", "est_cost": "$4.58", "likely_sale": false},
+      {"item": "Tzatziki, 8 oz", "est_cost": "$3.99", "likely_sale": false, "swap": "Plain Greek yogurt + cucumber"}
+    ],
+    "whole_foods": [
+      {"item": "Butternut squash", "est_cost": "$3.49", "likely_sale": true}
+    ],
+    "local_grocery": [
+      {"item": "Ground turkey, 2 lb", "est_cost": "$8.99", "likely_sale": true}
+    ]
+  },
+  "grocery_total": "$142",
+  "budget_tips": [
+    "Chicken thighs anchor two dinners this week.",
+    "A 3 lb pork shoulder at Costco is cheaper per pound than smaller packs."
+  ],
+  "pantry_note": "Assumes salt, pepper, dried spices, and cooking oil on hand."
+}

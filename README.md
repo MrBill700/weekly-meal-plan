@@ -18,7 +18,9 @@ personal lives in one file: `config.json`.** No coding required to make it yours
 - 📅 A fresh plan emailed on your schedule (default: Saturday morning)
 - 🔗 Every dinner links to a real recipe on a blog you trust
 - 🛒 Grocery list split by store, with budget tips, likely-on-sale flags, and swaps
-- 🔁 Never repeats recent dinners (it remembers the last several weeks)
+- 🧾 Every dinner comes with an ingredient list (amounts for your household) and steps
+- 🔁 Never repeats recent dinners -- and learns from your 1-5 ratings: favorites
+  come back, flops never do
 - 🌿 Uses what's in season near you
 - 🛟 Falls back to a cheaper AI model if your primary one is down, and emails you
   an alert if a run ever fails
@@ -119,11 +121,33 @@ Edit the `cron` line in `.github/workflows/weekly_meal_plan.yml`. The default
 
 ---
 
-## Optional: leave feedback for next week
-Create a file named `feedback.txt` in the repo with free-text notes
-("kids loved the Greek bowls", "skip mushrooms", "too much chicken last week").
-The planner reads it each run and adapts. It's gitignored by default so it stays
-private to your local copy — or commit it if you want it to persist.
+## Rate your dinners
+Every run records the week's dinners in `meal_history.json`, each with empty
+`rating` and `note` slots. Fill them in (the email links straight to the file's
+editor on GitHub):
+
+```json
+{"day": "Monday", "name": "Greek Chicken Bowls", "recipe_url": "...",
+ "rating": 5, "note": "kids loved it -- double the tzatziki"}
+```
+
+The planner reads every rating ever given:
+
+| Rating | What happens |
+|---|---|
+| **4-5** (favorite) | May come back once it's been off the menu 2 weeks -- at most 2 favorites a week. Its note is applied ("double the tzatziki"). |
+| **3** (neutral) | Normal rotation; won't repeat within the recent-history window. |
+| **1-2** (flop) | Never served again, nor close variants. |
+
+Notes work without a rating too ("kids refused the mushrooms"). For lasting
+rules ("no mushrooms ever"), use `diet` in `config.json` instead.
+
+> ⚠️ **Keep the JSON valid.** If a hand edit breaks the file (usually a missing
+> or extra comma), the run stops and emails you the line and column to fix --
+> it never overwrites your ratings.
+>
+> 🔒 Ratings and notes are committed to the repo, so anyone who can see the
+> repo can read them. Make the repo private if that matters.
 
 ---
 
@@ -133,13 +157,31 @@ private to your local copy — or commit it if you want it to persist.
 2. Filters them down to plausible dinners (drops desserts, drinks, roundups, and
    anything in your dietary exclusions).
 3. Draws a rotating weekly sample (seeded by the week, so re-runs match).
-4. Hands Claude that sample + your rules + recent history, and gets back a
-   structured plan. If Claude errors, it retries on your OpenRouter fallbacks.
+4. Hands Claude that sample + your rules + recent history + your ratings, and
+   gets back a structured plan: each dinner with ingredient amounts and steps,
+   plus a grocery list built from those ingredients. Scraped titles and your
+   notes are fenced off as data, so text on a blog can't rewrite the
+   instructions. If Claude errors, it retries on your OpenRouter fallbacks.
 5. Renders an HTML email and sends it via Gmail.
-6. Commits the week's meals to `meal_history.json` so they aren't repeated.
+6. Commits the week's meals to `meal_history.json` (with blank rating slots)
+   so they aren't repeated.
 
 `recipe_catalog.json` is a committed cache of blog URLs used as a safety net if
 the blogs are unreachable on run day.
+
+---
+
+## Preview and test locally
+No API key or email needed:
+
+```bash
+pip install -r requirements.txt pytest
+python tools/render_sample.py     # writes out/sample-email.html from a sample plan
+python -m pytest -q               # offline tests (also run on every push)
+```
+
+Re-render the sample after changing `config.json` (stores, branding, takeout
+night) to see how the email will look.
 
 ---
 
@@ -151,6 +193,8 @@ the blogs are unreachable on run day.
   so the fallback covers you.
 - **Recipes don't link / few catalog matches** — that blog may not expose a
   standard sitemap. Swap it for another.
+- **"meal_history.json is not valid JSON"** -- a hand edit broke the file. The
+  alert names the line and column; fix it on GitHub and re-run from Actions.
 - **Run failed but you didn't notice** — you should get a failure-alert email; set
   `ALERT_RECIPIENT` if you want it to go somewhere specific.
 
