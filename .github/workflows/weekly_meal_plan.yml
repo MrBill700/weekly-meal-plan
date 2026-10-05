@@ -44,6 +44,9 @@ jobs:
           OPENROUTER_MODELS:  ${{ secrets.OPENROUTER_MODELS }}
           ALERT_RECIPIENT:    ${{ secrets.ALERT_RECIPIENT }}
           PRIMARY_MODEL:      ${{ secrets.PRIMARY_MODEL }}
+          # Optional podcast (see AGENTS.md): when set, the email gets Listen buttons.
+          PODCAST_SITE_REPO:  ${{ vars.PODCAST_SITE_REPO }}
+          PODCAST_BASE_URL:   ${{ vars.PODCAST_BASE_URL }}
         run: python meal_planner.py
 
       # Recording the week's meals keeps dinners from repeating, and the commit

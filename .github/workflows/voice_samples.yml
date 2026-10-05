@@ -1,0 +1,52 @@
+name: Podcast Voice Samples
+
+# OPTIONAL, manual only. Renders every TTS voice reading one line per podcast
+# host and publishes a picker page at <site>/samples/. A few cents per run.
+# Needs the same setup as the podcast (PODCAST_SITE_REPO etc. -- see AGENTS.md).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: weekly-audio
+  cancel-in-progress: false
+
+jobs:
+  samples:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.repository != 'MrBill700/weekly-meal-plan' && vars.PODCAST_SITE_REPO != ''
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ vars.PODCAST_SITE_REPO }}
+          path: site
+          ssh-key: ${{ secrets.PODCAST_DEPLOY_KEY }}
+          persist-credentials: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - run: pip install -r requirements.txt 'openai>=1.68'
+
+      - name: Render samples
+        env:
+          OPENAI_API_KEY:    ${{ secrets.OPENAI_API_KEY }}
+          PODCAST_SITE_REPO: ${{ vars.PODCAST_SITE_REPO }}
+          PODCAST_SITE_DIR:  site
+        run: python voice_samples.py
+
+      - name: Publish samples
+        run: |
+          cd site
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --staged --quiet || (git commit -m "Voice samples $(date -u +%Y-%m-%d)" && git pull --rebase origin main && git push)

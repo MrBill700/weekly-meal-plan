@@ -4,7 +4,13 @@
     "headline": "Your Family · Your City",
     "who": "a family of 4 (2 adults, 2 young kids with low spice tolerance)",
     "location": "Portland, Oregon",
-    "people": 4
+    "people": 4,
+    "seasonal_produce": {
+      "winter": "winter squash, kale, cabbage, carrots, parsnips, storage apples",
+      "spring": "asparagus, peas, spinach, radishes, spring onions, rhubarb",
+      "summer": "zucchini, corn, tomatoes, peppers, cucumbers, berries, green beans",
+      "fall": "butternut squash, sweet potatoes, apples, pears, Brussels sprouts, cauliflower"
+    }
   },
 
   "sources": {
@@ -94,6 +100,30 @@
     "title_html": "This Week's<br><em>Dinner Plan</em>",
     "footer": "Generated for you every week · Happy cooking 🍽️",
     "openrouter_app_title": "Weekly Meal Plan"
+  },
+
+  "podcast": {
+    "title": "Our Dinner Plan",
+    "author": "Meal Planner Bot",
+    "description": "A few minutes each week walking through the coming week's dinners: what's cooking each night and one quick tip per meal.",
+    "language": "en-us",
+    "tone_from_blogs": true,
+    "hosts": [
+      {
+        "tag": "HOST",
+        "name": "Robin",
+        "persona": "the host. A warm, dry, quick-witted home cook who talks like a friend coaching you through the week, not an announcer.",
+        "voice": "coral",
+        "delivery": "Calm, low-key, conversational. Quiet confidence, gentle dry humor. Medium-low energy; never announce or sound like an ad. Unhurried pace with natural pauses."
+      },
+      {
+        "tag": "KID",
+        "name": "Pip",
+        "persona": "the kid co-host. Curious, a little skeptical, funny; asks the question a kid would ask and reacts honestly. Never bratty.",
+        "voice": "sage",
+        "delivery": "A kid around ten. Light, slightly higher voice; simple direct phrasing; curious, sometimes deadpan. A touch faster than an adult. Never a grown-up doing a kid voice."
+      }
+    ]
   },
 
   "tuning": {

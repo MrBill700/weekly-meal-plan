@@ -1,0 +1,156 @@
+name: Weekly Meal Plan Podcast
+
+# OPTIONAL. Does nothing until you set the PODCAST_SITE_REPO repository
+# variable (see AGENTS.md -- enabling it publishes your weekly dinners to a
+# public website).
+#
+# Runs after the plan email job finishes. `workflows:` matches the upstream
+# workflow's `name:` (NOT its filename) -- renaming "Weekly Meal Plan Email"
+# silently stops the audio. workflow_run is used instead of `push` because the
+# planner's history commit is pushed with GITHUB_TOKEN, and GitHub never fires
+# push-triggered workflows for those commits.
+on:
+  workflow_run:
+    workflows: ['Weekly Meal Plan Email']
+    types: [completed]
+    # Only an upstream run on main may publish; the job checks out main below.
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Rebuild the newest episode even if it is already live'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: weekly-audio
+  cancel-in-progress: false
+
+jobs:
+  publish-episode:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Off in the template repo itself and until PODCAST_SITE_REPO is set.
+    if: >-
+      github.repository != 'MrBill700/weekly-meal-plan' &&
+      vars.PODCAST_SITE_REPO != '' &&
+      (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success')
+
+    steps:
+      # workflow_run's head_sha predates the bot's meal-history commit; main has it.
+      - name: Checkout meal planner
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Checkout podcast site
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ vars.PODCAST_SITE_REPO }}
+          path: site
+          ssh-key: ${{ secrets.PODCAST_DEPLOY_KEY }}
+          persist-credentials: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # ffmpeg/ffprobe are NOT preinstalled on ubuntu-latest. Ubuntu's ffmpeg
+      # package is built with libmp3lame, which podcast.py needs.
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends ffmpeg
+          ffmpeg -version | head -1
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt 'openai>=1.68'
+
+      - name: Generate episode
+        id: generate
+        env:
+          ANTHROPIC_API_KEY:  ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY:     ${{ secrets.OPENAI_API_KEY }}
+          # Optional: script-writer fallback when Claude fails.
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          PODCAST_OPENROUTER_MODELS: ${{ vars.PODCAST_OPENROUTER_MODELS }}
+          GMAIL_SENDER:       ${{ secrets.GMAIL_SENDER }}
+          GMAIL_APP_PASS:     ${{ secrets.GMAIL_APP_PASS }}
+          ALERT_RECIPIENT:    ${{ secrets.ALERT_RECIPIENT }}
+          PODCAST_SITE_REPO:  ${{ vars.PODCAST_SITE_REPO }}
+          PODCAST_BASE_URL:   ${{ vars.PODCAST_BASE_URL }}
+          PODCAST_SITE_DIR:   site
+          # Handoff to the poll step; kept out of the site checkout so it is
+          # never committed to the public repo.
+          PODCAST_ID_FILE:    ${{ runner.temp }}/last_episode_id
+          PODCAST_FORCE:      ${{ inputs.force == true && '1' || '' }}
+        run: python podcast.py
+
+      - name: Publish episode
+        run: |
+          cd site
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --staged --quiet || (git commit -m "Episode $(date -u +%Y-%m-%d)" && git pull --rebase origin main && git push)
+
+      # Pages deploys asynchronously; confirm the feed actually carries the new
+      # episode. A timeout is a warning, not a failure -- the push succeeded.
+      # Pages sits behind a CDN with max-age=600, so each poll uses a fresh
+      # query string (part of the cache key) to avoid pinning a stale copy.
+      - name: Wait for Pages to serve the episode
+        env:
+          PODCAST_SITE_REPO: ${{ vars.PODCAST_SITE_REPO }}
+          PODCAST_BASE_URL:  ${{ vars.PODCAST_BASE_URL }}
+        run: |
+          [ -f "$RUNNER_TEMP/last_episode_id" ] || { echo "No episode this run (no history yet)."; exit 0; }
+          id="$(cat "$RUNNER_TEMP/last_episode_id")"
+          url="$(python -c 'import meal_planner as m; print(m.podcast_base_url())')feed.xml"
+          sleep 30
+          for i in $(seq 1 20); do
+            if curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$url?t=$(date +%s)" | grep -q "meal-plan-podcast:$id"; then
+              echo "Feed is live with episode $id."
+              exit 0
+            fi
+            sleep 30
+          done
+          echo "::warning::feed.xml did not show episode $id within 10 minutes; check the site repo's Pages settings."
+
+      # podcast.py emails its own failures; this covers every other step
+      # (checkouts, apt, pip, publish) so no failure in this job is silent.
+      # Uses stock python3 + smtplib only, so it works even if setup-python or
+      # the checkout failed.
+      - name: Alert on non-script failure
+        if: failure() && steps.generate.outcome != 'failure'
+        env:
+          GMAIL_SENDER:    ${{ secrets.GMAIL_SENDER }}
+          GMAIL_APP_PASS:  ${{ secrets.GMAIL_APP_PASS }}
+          ALERT_RECIPIENT: ${{ secrets.ALERT_RECIPIENT }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python3 - <<'EOF'
+          import os, smtplib, sys
+          from email.mime.text import MIMEText
+          sender = "".join(c for c in os.environ.get("GMAIL_SENDER", "") if ord(c) < 128).strip()
+          pw = "".join(c for c in os.environ.get("GMAIL_APP_PASS", "") if ord(c) < 128).strip()
+          to = [r.strip() for r in (os.environ.get("ALERT_RECIPIENT") or sender).split(",") if r.strip()]
+          if not (sender and pw and to):
+              print("No mail credentials; cannot alert.", file=sys.stderr); sys.exit(0)
+          run_url = os.environ.get("RUN_URL", "")
+          msg = MIMEText(
+              "<p>The weekly podcast job failed outside podcast.py (checkout, ffmpeg/pip "
+              "install, publish or poll step). The plan email itself is unaffected.</p>"
+              f'<p><a href="{run_url}">Open the Actions run</a> for the log.</p>',
+              "html", "utf-8")
+          msg["Subject"] = "Meal-plan podcast job failed"
+          msg["From"] = sender
+          msg["To"] = ", ".join(to)
+          with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
+              s.login(sender, pw)
+              s.sendmail(sender, to, msg.as_bytes())
+          print(f"Failure alert sent to {len(to)} recipient(s).")
+          EOF

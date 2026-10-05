@@ -21,7 +21,8 @@ personal lives in one file: `config.json`.** No coding required to make it yours
 - 🧾 Every dinner comes with an ingredient list (amounts for your household) and steps
 - 🔁 Never repeats recent dinners -- and learns from your 1-5 ratings: favorites
   come back, flops never do
-- 🌿 Uses what's in season near you
+- 🌿 Uses what's in season near you (optionally, your own list of local produce)
+- 🎧 *Optional:* a short weekly podcast episode of the plan (public; see [below](#optional-weekly-podcast))
 - 🛟 Falls back to a cheaper AI model if your primary one is down, and emails you
   an alert if a run ever fails
 
@@ -60,6 +61,7 @@ In your repo: **Settings → Secrets and variables → Actions → New repositor
 | `OPENROUTER_MODELS` | optional | Comma-separated fallback models (else uses `config.json`) |
 | `ALERT_RECIPIENT` | optional | Where failure alerts go (defaults to `GMAIL_SENDER`) |
 | `PRIMARY_MODEL` | optional | Override the model in `config.json` |
+| `OPENAI_API_KEY`, `PODCAST_DEPLOY_KEY` | podcast only | See [Optional: weekly podcast](#optional-weekly-podcast) |
 
 > 🔐 **Secrets are separate from your code.** Editing or pushing files never
 > touches them. They live in repo Settings and persist until you change them.
@@ -78,7 +80,7 @@ or locally. Here's what each section controls:
 
 | Section | Controls |
 |---|---|
-| `household` | Your name/city (used in the email header), who you're cooking for, and your location (for seasonal produce) |
+| `household` | Your name/city (used in the email header), who you're cooking for, and your location (for seasonal produce). Optional `seasonal_produce` lists what's local each season |
 | `sources.primary` | Your go-to blogs — most dinners come from these. `"domain": "Display Name"` |
 | `sources.secondary` | Backup blogs — at most one dinner/week unless your primaries are down |
 | `diet.hard_rules` | Non-negotiables (allergies, "no fish", spice level) |
@@ -90,6 +92,7 @@ or locally. Here's what each section controls:
 | `stores` | The stores you shop, their brand color, what you buy there, and a buying strategy. Add/remove freely |
 | `model` | Your primary Claude model + ordered OpenRouter fallbacks |
 | `branding` | Email subject, header title, footer |
+| `podcast` | Only if you turn the podcast on: show title/description and one or two hosts (name, persona, voice) |
 | `tuning` | Advanced knobs (how many weeks count as "recent", catalog sample size) |
 
 ### Adding your own blogs
@@ -168,6 +171,30 @@ rules ("no mushrooms ever"), use `diet` in `config.json` instead.
 
 `recipe_catalog.json` is a committed cache of blog URLs used as a safety net if
 the blogs are unreachable on run day.
+
+---
+
+## Optional: weekly podcast
+
+> ⚠️ **This publishes your weekly dinners to the public internet.** The podcast
+> lives on a separate public GitHub Pages site with an RSS feed anyone can find.
+> Episodes use AI-generated voices, and every episode says so. Cost: roughly
+> $0.05-0.10 a week (OpenAI text-to-speech).
+
+It's **off by default** -- nothing runs until you set the `PODCAST_SITE_REPO`
+repository variable. After each plan email, the "Weekly Meal Plan Podcast"
+workflow writes a short script for your hosts (set in `config.json` ->
+`podcast`), reads it aloud, and publishes the mp3 and feed to the site repo. The
+plan email then gets "Listen" buttons.
+
+Setup takes a second public repo, a deploy key, and an OpenAI key. The full
+walkthrough -- written so an AI agent or a person can follow it -- is in
+**[AGENTS.md](AGENTS.md#part-2----the-optional-podcast)**. Try it first in test
+mode, which makes no API calls and publishes nothing:
+
+```bash
+PODCAST_DRY_RUN=1 python podcast.py    # needs ffmpeg
+```
 
 ---
 
