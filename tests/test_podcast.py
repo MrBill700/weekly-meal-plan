@@ -123,15 +123,30 @@ def test_listen_buttons_only_when_configured(monkeypatch):
     assert "AI-generated voices" in html
 
 
-def test_empty_history_is_a_clean_no_op(site, tmp_path, monkeypatch):
+def test_empty_history_real_run_is_a_clean_no_op(site, tmp_path, monkeypatch):
+    history = tmp_path / "meal_history.json"
+    history.write_text("[]", encoding="utf-8")
+    monkeypatch.setattr(pc, "HISTORY_FILE", str(history))
+    monkeypatch.setattr(pc, "DRY_RUN", False)
+    monkeypatch.setattr(pc, "require_tools", lambda: None)
+    monkeypatch.setattr(pc, "write_script", lambda e: pytest.fail("must not spend"))
+    pc.run()
+    assert not os.path.exists(pc.ID_FILE)
+    assert not os.path.exists(site / "feed.xml")
+
+
+@pytest.mark.skipif(not HAS_FFMPEG, reason="ffmpeg/ffprobe not on PATH")
+def test_empty_history_test_mode_narrates_sample_week(site, tmp_path, monkeypatch):
+    """A fresh repo's `PODCAST_DRY_RUN=1 python podcast.py` must prove something."""
     history = tmp_path / "meal_history.json"
     history.write_text("[]", encoding="utf-8")
     monkeypatch.setattr(pc, "HISTORY_FILE", str(history))
     monkeypatch.setattr(pc, "DRY_RUN", True)
-    monkeypatch.setattr(pc, "require_tools", lambda: None)
     pc.run()
-    assert not os.path.exists(pc.ID_FILE)
-    assert not os.path.exists(site / "feed.xml")
+    ep_id = pc.episode_id(pc.SAMPLE_WEEK["week_of"])
+    assert (site / "episodes" / f"{ep_id}.mp3").is_file()
+    assert (site / "feed.xml").is_file()
+    assert history.read_text(encoding="utf-8") == "[]"
 
 
 # -- hosts from config --------------------------------------------------------

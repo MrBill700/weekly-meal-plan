@@ -163,6 +163,17 @@ MIN_BYTES      = 200_000
 ITUNES_NS = "http://www.itunes.com/dtds/podcast-1.0.dtd"
 
 
+# Test mode narrates this when meal_history.json is still empty (fresh repo).
+SAMPLE_WEEK = {
+    "week_of": "October 03, 2026",
+    "meals": [
+        {"day": "Sunday", "name": "Sheet Pan Chicken Thighs with Roasted Carrots", "recipe_url": ""},
+        {"day": "Monday", "name": "Turkey Chili", "recipe_url": ""},
+        {"day": "Tuesday", "name": "Turkey Chili Baked Potatoes", "recipe_url": ""},
+    ],
+}
+
+
 def _dry_run_script() -> str:
     """Canned test-mode script, written for whatever hosts are configured."""
     tags = list(SPEAKERS)
@@ -935,8 +946,12 @@ def run():
             text = f.read()
         history = json.loads(text) if text.strip() else []
     if not history:
-        print("No meal history yet -- nothing to narrate. Run the plan workflow first.")
-        return
+        if not DRY_RUN:
+            print("No meal history yet -- nothing to narrate. Run the plan workflow first.")
+            return
+        # A fresh repo has no plans yet; test mode still exercises the pipeline.
+        print("No meal history yet -- test mode is narrating a built-in sample week.")
+        history = [SAMPLE_WEEK]
     entry = latest_week(history)
     ep_id = episode_id(entry["week_of"])
     # Fail on a bad week_of here, before any API spend, not after the audio.
